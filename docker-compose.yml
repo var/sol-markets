@@ -11,7 +11,6 @@ services:
       - PORT=4000
       - RPC_ENDPOINT=${RPC_ENDPOINT:-https://api.mainnet-beta.solana.com}
       - WS_ENDPOINT=${WS_ENDPOINT:-wss://api.mainnet-beta.solana.com}
-      - RAYDIUM_API_URL=${RAYDIUM_API_URL:-https://api.raydium.io/v2/main/pairs}
       - METEORA_API_URL=${METEORA_API_URL:-https://dlmm-api.meteora.ag/pair/all}
       - ORCA_API_URL=${ORCA_API_URL:-https://api.orca.so/v2/solana/pools}
       - ENABLE_METEORA=${ENABLE_METEORA:-true}

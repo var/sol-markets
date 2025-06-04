@@ -35,7 +35,11 @@ describe('RaydiumMarket', () => {
         it('should return empty array when no matching pools found', async () => {
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue([])
+                json: jest.fn().mockResolvedValue({
+                    data: {
+                        data: []
+                    }
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -44,17 +48,23 @@ describe('RaydiumMarket', () => {
         });
 
         it('should return markets with correct data', async () => {
-            const mockPoolData = [
-                {
-                    baseMint: 'So11111111111111111111111111111111111111112',
-                    quoteMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-                    ammId: 'test-pool-id',
-                    price: '158.5',
-                    liquidity: '2000000',
-                    volume24h: '5000000',
-                    fee24h: '10000'
+            const mockPoolData = {
+                data: {
+                    data: [
+                        {
+                            id: 'test-pool-id',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                            price: '158.5',
+                            tvl: '2000000',
+                            day: {
+                                volume: '5000000',
+                                volumeFee: '10000'
+                            }
+                        }
+                    ]
                 }
-            ];
+            };
 
             const mockResponse = {
                 ok: true,
@@ -76,18 +86,43 @@ describe('RaydiumMarket', () => {
             expect(typeof markets[0].timestamp).toBe('number');
         });
 
+        it('should use correct V3 API URL with server-side filtering', async () => {
+            const mockResponse = {
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    data: {
+                        data: []
+                    }
+                })
+            };
+            mockFetch.mockResolvedValue(mockResponse as any);
+
+            await raydiumMarket.getMarkets(mockPair);
+
+            expect(mockFetch).toHaveBeenCalledWith(
+                expect.stringContaining('https://api-v3.raydium.io/pools/info/mint?mint1=So11111111111111111111111111111111111111112&mint2=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
+                expect.any(Object)
+            );
+        });
+
         it('should handle inverted token pairs correctly', async () => {
-            const mockPoolData = [
-                {
-                    baseMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-                    quoteMint: 'So11111111111111111111111111111111111111112', // SOL
-                    ammId: 'inverted-pool',
-                    price: '0.0063', // USDC/SOL price
-                    liquidity: '1000000',
-                    volume24h: '2000000',
-                    fee24h: '5000'
+            const mockPoolData = {
+                data: {
+                    data: [
+                        {
+                            id: 'inverted-pool',
+                            mintA: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' }, // USDC first
+                            mintB: { address: 'So11111111111111111111111111111111111111112' }, // SOL second
+                            price: '0.0063', // USDC/SOL price
+                            tvl: '1000000',
+                            day: {
+                                volume: '2000000',
+                                volumeFee: '5000'
+                            }
+                        }
+                    ]
                 }
-            ];
+            };
 
             const mockResponse = {
                 ok: true,
@@ -98,31 +133,39 @@ describe('RaydiumMarket', () => {
             const markets = await raydiumMarket.getMarkets(mockPair);
 
             expect(markets).toHaveLength(1);
-            // Price should be inverted since tokenA (SOL) is the quote token in this pool
+            // Price should be inverted since tokenA (SOL) is not the first mint in this pool
             expect(markets[0].price).toBeCloseTo(1 / 0.0063, 5);
         });
 
-        it('should sort markets by liquidity descending', async () => {
-            const mockPoolData = [
-                {
-                    baseMint: 'So11111111111111111111111111111111111111112',
-                    quoteMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-                    ammId: 'pool-1',
-                    price: '158.5',
-                    liquidity: '1000000',
-                    volume24h: '2000000',
-                    fee24h: '5000'
-                },
-                {
-                    baseMint: 'So11111111111111111111111111111111111111112',
-                    quoteMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-                    ammId: 'pool-2',
-                    price: '158.6',
-                    liquidity: '3000000',
-                    volume24h: '4000000',
-                    fee24h: '8000'
+        it('should sort markets by TVL descending', async () => {
+            const mockPoolData = {
+                data: {
+                    data: [
+                        {
+                            id: 'pool-1',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                            price: '158.5',
+                            tvl: '1000000',
+                            day: {
+                                volume: '2000000',
+                                volumeFee: '5000'
+                            }
+                        },
+                        {
+                            id: 'pool-2',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                            price: '158.6',
+                            tvl: '3000000',
+                            day: {
+                                volume: '4000000',
+                                volumeFee: '8000'
+                            }
+                        }
+                    ]
                 }
-            ];
+            };
 
             const mockResponse = {
                 ok: true,
@@ -133,8 +176,52 @@ describe('RaydiumMarket', () => {
             const markets = await raydiumMarket.getMarkets(mockPair);
 
             expect(markets).toHaveLength(2);
-            expect(markets[0].liquidity).toBe(3000000); // Higher liquidity first
+            expect(markets[0].liquidity).toBe(3000000); // Higher TVL first
             expect(markets[1].liquidity).toBe(1000000);
+        });
+
+        it('should apply minimum liquidity filter', async () => {
+            const raydiumMarketWithMinLiquidity = new RaydiumMarket(2500000);
+            
+            const mockPoolData = {
+                data: {
+                    data: [
+                        {
+                            id: 'low-tvl-pool',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                            price: '158.5',
+                            tvl: '1000000', // Below minimum
+                            day: {
+                                volume: '2000000',
+                                volumeFee: '5000'
+                            }
+                        },
+                        {
+                            id: 'high-tvl-pool',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                            price: '158.6',
+                            tvl: '5000000', // Above minimum
+                            day: {
+                                volume: '4000000',
+                                volumeFee: '8000'
+                            }
+                        }
+                    ]
+                }
+            };
+
+            const mockResponse = {
+                ok: true,
+                json: jest.fn().mockResolvedValue(mockPoolData)
+            };
+            mockFetch.mockResolvedValue(mockResponse as any);
+
+            const markets = await raydiumMarketWithMinLiquidity.getMarkets(mockPair);
+
+            expect(markets).toHaveLength(1);
+            expect(markets[0].poolAddress).toBe('high-tvl-pool');
         });
 
         it('should handle API errors gracefully', async () => {
@@ -162,24 +249,30 @@ describe('RaydiumMarket', () => {
         });
 
         it('should handle pool processing errors gracefully', async () => {
-            const mockPoolData = [
-                {
-                    baseMint: 'So11111111111111111111111111111111111111112',
-                    quoteMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-                    ammId: 'valid-pool',
-                    price: '158.5',
-                    liquidity: '2000000',
-                    volume24h: '5000000',
-                    fee24h: '10000'
-                },
-                {
-                    // Invalid pool data - missing required fields
-                    baseMint: 'So11111111111111111111111111111111111111112',
-                    quoteMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-                    ammId: 'invalid-pool'
-                    // Missing price, liquidity, etc.
+            const mockPoolData = {
+                data: {
+                    data: [
+                        {
+                            id: 'valid-pool',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                            price: '158.5',
+                            tvl: '2000000',
+                            day: {
+                                volume: '5000000',
+                                volumeFee: '10000'
+                            }
+                        },
+                        {
+                            // Invalid pool data - missing required fields
+                            id: 'invalid-pool',
+                            mintA: { address: 'So11111111111111111111111111111111111111112' },
+                            mintB: { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' }
+                            // Missing price, tvl, etc.
+                        }
+                    ]
                 }
-            ];
+            };
 
             const mockResponse = {
                 ok: true,
@@ -198,6 +291,7 @@ describe('RaydiumMarket', () => {
             expect(consoleSpy).toHaveBeenCalledWith(
                 expect.stringContaining('[Raydium] Pool invalid-pool has invalid numeric values, skipping')
             );
+
             consoleSpy.mockRestore();
         });
     });
