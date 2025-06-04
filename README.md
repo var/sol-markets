@@ -1,12 +1,11 @@
 # Sol Markets
 
-A TypeScript application that fetches token pair prices from multiple Solana DEXes including Orca, Raydium, and Meteora, with real-time on-chain PumpFun token monitoring. Available as both a CLI tool and GraphQL API.
+A TypeScript application that fetches token pair prices from multiple Solana DEXes including Orca, Raydium, and Meteora, with real-time on-chain PumpFun token monitoring via GraphQL API.
 
 ## Features
 
 - **Multi-DEX Support**: Fetches prices from Orca, Raydium, and Meteora
 - **GraphQL API**: Modern GraphQL interface for querying token prices
-- **CLI Interface**: Command-line tool for quick price checks
 - **Real-time Data**: Live price feeds from DEX APIs
 - **PumpFun Monitoring**: Real-time on-chain monitoring of new PumpFun token creation events
 - **GraphQL Subscriptions**: Live WebSocket-based subscriptions for PumpFun token events
@@ -362,8 +361,45 @@ The application includes real-time monitoring of PumpFun token creation events d
 - **Event Types**: `token_created`, `token_updated`, `token_completed`
 - **Data Source**: Directly from Solana blockchain transactions (no API dependencies)
 
-### CLI Interface
+## Testing
 
-Run the CLI tool:
+Run the test suite:
 
+```bash
+npm test
 ```
+
+Run tests in watch mode:
+
+```bash
+npm run test:watch
+```
+
+## Development
+
+Start the development server with hot reload:
+
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+## Architecture
+
+The application follows a modular architecture with domain-driven design:
+
+- **GraphQL Server**: Apollo Server with WebSocket subscriptions
+- **DEX Providers**: Modular providers for each DEX (Orca, Raydium, Meteora)
+- **PumpFun Service**: On-chain event monitoring with Anchor-based decoding
+- **Type Safety**: Full TypeScript coverage with strict typing
+- **Testing**: Comprehensive test suite with Jest and mocking
+- **Production Ready**: Docker containerization and health checks
+
+## License
+
+MIT License
