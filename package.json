@@ -1,0 +1,59 @@
+{
+  "name": "sol-markets",
+  "version": "1.0.0",
+  "description": "A TypeScript project to fetch token pair prices from various Solana DEXes",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/server.ts",
+    "server": "ts-node src/server.ts",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "docker:build": "docker build -t sol-markets .",
+    "docker:run": "docker run -p 4000:4000 sol-markets",
+    "docker:up": "docker-compose up --build",
+    "docker:up:detached": "docker-compose up -d --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "keywords": [
+    "solana",
+    "defi",
+    "price",
+    "dex"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/server": "~4.10.0",
+    "@graphql-tools/merge": "^9.0.24",
+    "@graphql-tools/schema": "^10.0.23",
+    "@project-serum/anchor": "^0.26.0",
+    "@solana/web3.js": "~1.98.2",
+    "cors": "~2.8.5",
+    "dotenv": "~16.5.0",
+    "express": "~4.18.2",
+    "graphql": "~16.8.1",
+    "graphql-subscriptions": "^3.0.0",
+    "graphql-ws": "^6.0.5",
+    "subscriptions-transport-ws": "^0.11.0",
+    "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "@types/cors": "~2.8.17",
+    "@types/express": "~4.17.21",
+    "@types/jest": "~29.5.12",
+    "@types/node": "~22.15.29",
+    "@types/node-fetch": "~2.6.12",
+    "@types/ws": "^8.18.1",
+    "graphql-tag": "^2.12.6",
+    "jest": "~29.7.0",
+    "node-fetch": "~2.7.0",
+    "ts-jest": "~29.1.2",
+    "ts-node": "~10.9.2",
+    "ts-node-dev": "~1.1.8",
+    "typescript": "~5.8.3"
+  }
+}

@@ -1,0 +1,15 @@
+extend type Query {
+  orcaMarkets(tokenAMint: String!, tokenBMint: String!, slippageBps: Int = 50, minLiquidity: Float = 0): [OrcaMarket!]!
+}
+
+type OrcaMarket implements Market {
+  dex: String!
+  price: Float!
+  timestamp: Float!
+  tvl: Float
+  fee: Float
+  volume24h: Float
+  poolAddress: String
+  tokenA: Token
+  tokenB: Token
+} 

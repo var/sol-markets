@@ -1,0 +1,3 @@
+extend type Query {
+  markets(tokenAMint: String!, tokenBMint: String!, dexes: [DexName!], slippageBps: Int = 50, minLiquidity: Float = 0): [Market!]!
+} 

@@ -1,0 +1,24 @@
+# Common types shared across DEXes
+interface Market {
+  dex: String!
+  price: Float!
+  timestamp: Float!
+}
+
+type Token {
+  address: String!
+  decimals: Int!
+  symbol: String!
+  name: String!
+}
+
+enum DexName {
+  ORCA
+  RAYDIUM
+  METEORA
+}
+
+input TokenPairInput {
+  tokenAMint: String!
+  tokenBMint: String!
+} 

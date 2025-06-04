@@ -1,0 +1,13 @@
+extend type Query {
+  raydiumMarkets(tokenAMint: String!, tokenBMint: String!, slippageBps: Int = 50, minLiquidity: Float = 0): [RaydiumMarket!]!
+}
+
+type RaydiumMarket implements Market {
+  dex: String!
+  price: Float!
+  timestamp: Float!
+  liquidity: Float
+  volume_24h: Float
+  fee_24h: Float
+  poolAddress: String
+} 

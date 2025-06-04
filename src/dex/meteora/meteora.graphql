@@ -1,0 +1,13 @@
+extend type Query {
+  meteoraMarkets(tokenAMint: String!, tokenBMint: String!, slippageBps: Int = 50, minLiquidity: Float = 0): [MeteoraMarket!]!
+}
+
+type MeteoraMarket implements Market {
+  dex: String!
+  price: Float!
+  timestamp: Float!
+  binStep: Int
+  liquidity: Float
+  baseFeePercentage: Float
+  poolAddress: String
+} 

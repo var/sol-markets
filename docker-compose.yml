@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  sol-markets:
+    build: .
+    container_name: sol-markets
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - RPC_ENDPOINT=${RPC_ENDPOINT:-https://api.mainnet-beta.solana.com}
+      - WS_ENDPOINT=${WS_ENDPOINT:-wss://api.mainnet-beta.solana.com}
+      - RAYDIUM_API_URL=${RAYDIUM_API_URL:-https://api.raydium.io/v2/main/pairs}
+      - METEORA_API_URL=${METEORA_API_URL:-https://dlmm-api.meteora.ag/pair/all}
+      - ORCA_API_URL=${ORCA_API_URL:-https://api.orca.so/v2/solana/pools}
+      - ENABLE_METEORA=${ENABLE_METEORA:-true}
+      - ENABLE_RAYDIUM=${ENABLE_RAYDIUM:-true}
+      - ENABLE_ORCA=${ENABLE_ORCA:-true}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sol-network
+
+networks:
+  sol-network:
+    driver: bridge 

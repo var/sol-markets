@@ -1,0 +1,37 @@
+extend type Query {
+  pumpFunMonitoringStatus: PumpFunMonitoringStatus!
+}
+
+extend type Subscription {
+  newPumpFunToken: PumpFunTokenEvent!
+  pumpFunTokenEvents: PumpFunTokenEvent!
+}
+
+type PumpFunToken {
+  mint: String!
+  name: String!
+  symbol: String!
+  description: String
+  image: String
+  creator: String!
+  bondingCurveKey: String
+  createdTimestamp: Float!
+}
+
+type PumpFunTokenEvent {
+  type: PumpFunEventType!
+  token: PumpFunToken!
+  timestamp: Float!
+  txSignature: String
+}
+
+type PumpFunMonitoringStatus {
+  isActive: Boolean!
+  message: String!
+}
+
+enum PumpFunEventType {
+  token_created
+  token_updated
+  token_completed
+} 
