@@ -304,26 +304,6 @@ subscription NewPumpFunTokens {
 }
 ```
 
-**Subscribe to all PumpFun token events:**
-```graphql
-subscription AllPumpFunEvents {
-  pumpFunTokenEvents {
-    type
-    token {
-      mint
-      name
-      symbol
-      description
-      creator
-      createdTimestamp
-      complete
-    }
-    timestamp
-    txSignature
-  }
-}
-```
-
 **Available Queries:**
 - `markets(tokenAMint, tokenBMint, dexes?, slippageBps?, minLiquidity?)` - Get markets from all enabled DEXes or specific DEXes
   - `dexes` parameter is optional and accepts an array of: `[ORCA, RAYDIUM, METEORA]`
@@ -337,7 +317,6 @@ subscription AllPumpFunEvents {
 
 **Available Subscriptions:**
 - `newPumpFunToken` - Real-time events for new PumpFun token creation (on-chain monitoring)
-- `pumpFunTokenEvents` - All PumpFun token events including creation, updates, and completion
 
 **Available DEX Values:**
 - `ORCA` - Orca DEX

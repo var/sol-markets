@@ -4,7 +4,6 @@ extend type Query {
 
 extend type Subscription {
   newPumpFunToken: PumpFunTokenEvent!
-  pumpFunTokenEvents: PumpFunTokenEvent!
 }
 
 type PumpFunToken {
@@ -32,6 +31,4 @@ type PumpFunMonitoringStatus {
 
 enum PumpFunEventType {
   token_created
-  token_updated
-  token_completed
 } 

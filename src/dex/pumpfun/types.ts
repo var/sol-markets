@@ -10,7 +10,7 @@ export interface PumpFunToken {
 }
 
 export interface PumpFunTokenEvent {
-  type: 'token_created' | 'token_updated' | 'token_completed';
+  type: 'token_created';
   token: PumpFunToken;
   timestamp: number;
   txSignature?: string;

@@ -15,8 +15,7 @@ async function startMonitoringIfNeeded(): Promise<void> {
     if (!pumpFunEventListener) {
       pumpFunEventListener = (event) => {
         pubsub.publish(PUMPFUN_EVENTS, { 
-          newPumpFunToken: event,
-          pumpFunTokenEvents: event 
+          newPumpFunToken: event
         });
       };
       pumpFunService.on('tokenCreated', pumpFunEventListener);
@@ -44,7 +43,7 @@ async function stopMonitoringIfNeeded(): Promise<void> {
   }
 }
 
-function createSubscription(field: string) {
+function createSubscription() {
   return {
     subscribe: async () => {
       await startMonitoringIfNeeded();
@@ -76,8 +75,7 @@ export const pumpFunResolvers = {
   },
 
   Subscription: {
-    newPumpFunToken: createSubscription('newPumpFunToken'),
-    pumpFunTokenEvents: createSubscription('pumpFunTokenEvents'),
+    newPumpFunToken: createSubscription(),
   },
 };
 
