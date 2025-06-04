@@ -18,9 +18,9 @@ export class RaydiumMarket extends MarketProvider<RaydiumMarketResult> {
     try {
       console.log(`[Raydium] Fetching markets for ${pair.tokenAMint} / ${pair.tokenBMint}`);
 
-      // Use V3 API with server-side filtering by both mint addresses
-      const baseUrl = 'https://api-v3.raydium.io/pools/info/mint';
-      const url = `${baseUrl}?mint1=${pair.tokenAMint}&mint2=${pair.tokenBMint}&poolType=all&poolSortField=default&sortType=desc&pageSize=100&page=1`;
+      // Use environment variable for API URL
+      const baseUrl = process.env.RAYDIUM_API_URL || 'https://api-v3.raydium.io/pools/info/mint';
+      const url = `${baseUrl}?mint1=${pair.tokenAMint}&mint2=${pair.tokenBMint}&poolType=all&poolSortField=default&sortType=desc&pageSize=1000&page=1`;
       
       console.log(`[Raydium] Querying: ${url}`);
 

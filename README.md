@@ -83,7 +83,7 @@ Create a `.env` file for Docker deployment:
 RPC_ENDPOINT=https://api.mainnet-beta.solana.com
 
 # DEX API URLs
-RAYDIUM_API_URL=https://api.raydium.io/v2/main/pairs
+RAYDIUM_API_URL=https://api-v3.raydium.io/pools/info/mint
 METEORA_API_URL=https://dlmm-api.meteora.ag/pair/all
 ORCA_API_URL=https://api.orca.so/v2/solana/pools
 
@@ -115,7 +115,7 @@ Create a `.env` file in the root directory:
 RPC_ENDPOINT=https://api.mainnet-beta.solana.com
 
 # DEX API URLs (optional, defaults to public endpoints)
-RAYDIUM_API_URL=https://api.raydium.io/v2/main/pairs
+RAYDIUM_API_URL=https://api-v3.raydium.io/pools/info/mint
 METEORA_API_URL=https://dlmm-api.meteora.ag/pair/all
 ORCA_API_URL=https://api.orca.so/v2/solana/pools
 

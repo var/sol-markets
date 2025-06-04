@@ -24,7 +24,7 @@ global.fetch = async function fetch(url: string | URL | Request, init?: RequestI
 // Set default environment variables for tests if not already set
 if (process.env.NODE_ENV === 'test') {
     process.env.RPC_ENDPOINT = process.env.RPC_ENDPOINT || 'https://api.mainnet-beta.solana.com';
-    process.env.RAYDIUM_API_URL = process.env.RAYDIUM_API_URL || 'https://api.raydium.io/v2/main/pairs';
+    process.env.RAYDIUM_API_URL = process.env.RAYDIUM_API_URL || 'https://api-v3.raydium.io/pools/info/mint';
     process.env.METEORA_API_URL = process.env.METEORA_API_URL || 'https://dlmm-api.meteora.ag/pair/all';
     process.env.ORCA_API_URL = process.env.ORCA_API_URL || 'https://api.orca.so/v2/solana/pools';
 } 
