@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   sol-markets:
     build: .
@@ -11,7 +9,8 @@ services:
       - PORT=4000
       - RPC_ENDPOINT=${RPC_ENDPOINT:-https://api.mainnet-beta.solana.com}
       - WS_ENDPOINT=${WS_ENDPOINT:-wss://api.mainnet-beta.solana.com}
-      - METEORA_API_URL=${METEORA_API_URL:-https://dlmm-api.meteora.ag/pair/all}
+      - RAYDIUM_API_URL=${RAYDIUM_API_URL:-https://api-v3.raydium.io/pools/info/mint}
+      - METEORA_API_URL=${METEORA_API_URL:-https://dlmm-api.meteora.ag/pair/all_by_groups}
       - ORCA_API_URL=${ORCA_API_URL:-https://api.orca.so/v2/solana/pools}
       - ENABLE_METEORA=${ENABLE_METEORA:-true}
       - ENABLE_RAYDIUM=${ENABLE_RAYDIUM:-true}

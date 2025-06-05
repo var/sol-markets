@@ -280,19 +280,11 @@ describe('RaydiumMarket', () => {
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
-            const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
             const markets = await raydiumMarket.getMarkets(mockPair);
 
             // Only the valid pool should be returned, invalid pool filtered out
             expect(markets).toHaveLength(1);
             expect(markets[0].poolAddress).toBe('valid-pool');
-            // Should log about skipping invalid pool
-            expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('[Raydium] Pool invalid-pool has invalid numeric values, skipping')
-            );
-
-            consoleSpy.mockRestore();
         });
     });
 }); 

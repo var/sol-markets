@@ -18,20 +18,15 @@ export class OrcaMarket extends MarketProvider<OrcaMarketResult> {
     const { tokenAMint, tokenBMint } = pair;
 
     try {
-      console.log(`[Orca] Fetching markets for ${tokenAMint} / ${tokenBMint}`);
-
-      // Build query parameters for server-side filtering
       const baseUrl = process.env.ORCA_API_URL || 'https://api.orca.so/v2/solana/pools';
       
-      // Build URL manually to avoid encoding issues - add minTvl parameter
+      // Build URL with server-side filtering parameters
       let url = `${baseUrl}?tokensBothOf=${tokenAMint},${tokenBMint}&size=50`;
       
       // Add minimum TVL filter if specified
       if (this.minLiquidity > 0) {
         url += `&minTvl=${this.minLiquidity}`;
       }
-
-      console.log(`[Orca] Querying: ${url}`);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -47,46 +42,54 @@ export class OrcaMarket extends MarketProvider<OrcaMarketResult> {
       }
 
       const data: WhirlpoolResponse = await response.json();
-      console.log(`[Orca] Received ${data.data?.length || 0} pools from API`);
 
       if (!data.data || data.data.length === 0) {
-        console.log('[Orca] No pools found for this token pair');
         return [];
       }
 
-      // Convert to standardized format - minimal processing needed since server did the filtering
-      const markets: OrcaMarketResult[] = [];
+      // Convert pools to standardized market format
+      return this.processPoolsToMarkets(data.data);
       
-      for (const pool of data.data) {
-        const price = parseFloat(pool.price);
-        const tvl = parseFloat(pool.tvlUsdc);
-        const volume24h = parseFloat(pool.stats?.['24h']?.volume || '0');
-        
-        // Basic validation
-        if (price <= 0) {
-          console.log(`[Orca] Pool ${pool.address} has invalid price (${pool.price}), skipping`);
-          continue;
-        }
-        
-        markets.push({
-          dex: 'Orca',
-          price,
-          poolAddress: pool.address,
-          timestamp: Date.now(),
-          tvl,
-          fee: pool.feeRate,
-          volume24h,
-          tokenA: pool.tokenA,
-          tokenB: pool.tokenB
-        });
-      }
-
-      console.log(`[Orca] Found ${markets.length} valid pools`);
-      return markets;
     } catch (error) {
       console.error('[Orca] Error fetching or processing markets:', error);
       return [];
     }
+  }
+
+  private processPoolsToMarkets(pools: WhirlpoolData[]): OrcaMarketResult[] {
+    const markets: OrcaMarketResult[] = [];
+    
+    for (const pool of pools) {
+      const market = this.processPool(pool);
+      if (market) {
+        markets.push(market);
+      }
+    }
+    
+    return markets;
+  }
+
+  private processPool(pool: WhirlpoolData): OrcaMarketResult | null {
+    const price = parseFloat(pool.price);
+    const tvl = parseFloat(pool.tvlUsdc);
+    const volume24h = parseFloat(pool.stats?.['24h']?.volume || '0');
+    
+    // Basic validation
+    if (price <= 0) {
+      return null;
+    }
+    
+    return {
+      dex: 'Orca',
+      price,
+      poolAddress: pool.address,
+      timestamp: Date.now(),
+      tvl,
+      fee: pool.feeRate,
+      volume24h,
+      tokenA: pool.tokenA,
+      tokenB: pool.tokenB
+    };
   }
 }
 

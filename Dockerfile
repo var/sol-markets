@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm ci --only=development
+# Install all dependencies (production and dev for building)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -32,11 +32,11 @@ RUN npm ci --only=production && npm cache clean --force
 COPY --from=builder /app/dist ./dist
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001 && \
-    chown -R nextjs:nodejs /app
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup && \
+    chown -R appuser:appgroup /app
 
-USER nextjs
+USER appuser
 
 # Expose port
 EXPOSE 4000
