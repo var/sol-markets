@@ -39,7 +39,10 @@ describe('MeteoraMarket', () => {
         it('should return empty array when no matching pools found', async () => {
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue([])
+                json: jest.fn().mockResolvedValue({
+                    groups: [],
+                    total: 0
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -56,13 +59,22 @@ describe('MeteoraMarket', () => {
                     current_price: '158.5',
                     liquidity: '2000',
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 }
             ];
 
+            // Mock the grouped response structure from all_by_groups endpoint
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockPoolData)
+                json: jest.fn().mockResolvedValue({
+                    groups: [
+                        {
+                            name: 'SOL-USDC',
+                            pairs: mockPoolData
+                        }
+                    ],
+                    total: 1
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -75,7 +87,7 @@ describe('MeteoraMarket', () => {
                 poolAddress: 'test-pool-address',
                 binStep: 10,
                 liquidity: 2000,
-                baseFeePercentage: 0.5 // 0.005 * 100
+                baseFeePercentage: 0.5
             });
             expect(typeof markets[0].timestamp).toBe('number');
         });
@@ -89,13 +101,22 @@ describe('MeteoraMarket', () => {
                     current_price: '0.0063', // USDC/SOL price
                     liquidity: '1000',
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 }
             ];
 
+            // Mock the grouped response structure
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockPoolData)
+                json: jest.fn().mockResolvedValue({
+                    groups: [
+                        {
+                            name: 'SOL-USDC',
+                            pairs: mockPoolData
+                        }
+                    ],
+                    total: 1
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -118,7 +139,7 @@ describe('MeteoraMarket', () => {
                     current_price: '158.5',
                     liquidity: '50', // Below minimum
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 },
                 {
                     address: 'high-liquidity-pool',
@@ -127,13 +148,22 @@ describe('MeteoraMarket', () => {
                     current_price: '158.6',
                     liquidity: '2000', // Above minimum
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 }
             ];
 
+            // Mock the grouped response structure
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockPoolData)
+                json: jest.fn().mockResolvedValue({
+                    groups: [
+                        {
+                            name: 'SOL-USDC',
+                            pairs: mockPoolData
+                        }
+                    ],
+                    total: 1
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -152,7 +182,7 @@ describe('MeteoraMarket', () => {
                     current_price: '158.5',
                     liquidity: '1000',
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 },
                 {
                     address: 'pool-2',
@@ -161,13 +191,22 @@ describe('MeteoraMarket', () => {
                     current_price: '158.6',
                     liquidity: '3000',
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 }
             ];
 
+            // Mock the grouped response structure
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockPoolData)
+                json: jest.fn().mockResolvedValue({
+                    groups: [
+                        {
+                            name: 'SOL-USDC',
+                            pairs: mockPoolData
+                        }
+                    ],
+                    total: 1
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -187,13 +226,22 @@ describe('MeteoraMarket', () => {
                     current_price: '0', // Invalid price
                     liquidity: '2000',
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 }
             ];
 
+            // Mock the grouped response structure
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockPoolData)
+                json: jest.fn().mockResolvedValue({
+                    groups: [
+                        {
+                            name: 'SOL-USDC',
+                            pairs: mockPoolData
+                        }
+                    ],
+                    total: 1
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -234,7 +282,7 @@ describe('MeteoraMarket', () => {
                     current_price: '158.5',
                     liquidity: '2000',
                     bin_step: '10',
-                    base_fee: '0.005'
+                    base_fee_percentage: '0.5'
                 },
                 {
                     // Invalid pool data - missing required fields will cause parseFloat to return NaN
@@ -246,9 +294,18 @@ describe('MeteoraMarket', () => {
                 }
             ];
 
+            // Mock the grouped response structure
             const mockResponse = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockPoolData)
+                json: jest.fn().mockResolvedValue({
+                    groups: [
+                        {
+                            name: 'SOL-USDC',
+                            pairs: mockPoolData
+                        }
+                    ],
+                    total: 1
+                })
             };
             mockFetch.mockResolvedValue(mockResponse as any);
 
@@ -257,6 +314,37 @@ describe('MeteoraMarket', () => {
             // Only the valid pool should be returned, invalid pool filtered out by liquidity check
             expect(markets).toHaveLength(1);
             expect(markets[0].poolAddress).toBe('valid-pool');
+        });
+
+        it('should use correct API URL with server-side filtering', async () => {
+            const mockResponse = {
+                ok: true,
+                json: jest.fn().mockResolvedValue({
+                    groups: [],
+                    total: 0
+                })
+            };
+            mockFetch.mockResolvedValue(mockResponse as any);
+
+            await meteoraMarket.getMarkets(mockPair);
+
+            // Verify the correct URL was called with proper query parameters
+            expect(mockFetch).toHaveBeenCalledWith(
+                expect.stringContaining('pair/all_by_groups'),
+                expect.objectContaining({
+                    method: 'GET',
+                    headers: expect.objectContaining({
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    })
+                })
+            );
+
+            // Verify the include_pool_token_pairs parameter is present
+            const calledUrl = mockFetch.mock.calls[0][0] as string;
+            expect(calledUrl).toContain('include_pool_token_pairs=');
+            expect(calledUrl).toContain('So11111111111111111111111111111111111111112-EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+            expect(calledUrl).toContain('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v-So11111111111111111111111111111111111111112');
         });
     });
 }); 

@@ -84,7 +84,7 @@ RPC_ENDPOINT=https://api.mainnet-beta.solana.com
 
 # DEX API URLs
 RAYDIUM_API_URL=https://api-v3.raydium.io/pools/info/mint
-METEORA_API_URL=https://dlmm-api.meteora.ag/pair/all
+METEORA_API_URL=https://dlmm-api.meteora.ag/pair/all_by_groups
 ORCA_API_URL=https://api.orca.so/v2/solana/pools
 
 # DEX Provider Controls
@@ -116,7 +116,7 @@ RPC_ENDPOINT=https://api.mainnet-beta.solana.com
 
 # DEX API URLs (optional, defaults to public endpoints)
 RAYDIUM_API_URL=https://api-v3.raydium.io/pools/info/mint
-METEORA_API_URL=https://dlmm-api.meteora.ag/pair/all
+METEORA_API_URL=https://dlmm-api.meteora.ag/pair/all_by_groups
 ORCA_API_URL=https://api.orca.so/v2/solana/pools
 
 # DEX Configuration (optional, all enabled by default)

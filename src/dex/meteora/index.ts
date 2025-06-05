@@ -20,8 +20,22 @@ export class MeteoraMarket extends MarketProvider<MeteoraMarketResult> {
     try {
       const { tokenAMint, tokenBMint } = pair;
       
-      // Fetch all pools from Meteora API
-      const url = process.env.METEORA_API_URL || 'https://dlmm-api.meteora.ag/pair/all';
+      console.log(`[Meteora] Fetching markets for ${tokenAMint} / ${tokenBMint}`);
+      
+      // Use environment variable for API URL with server-side filtering
+      const baseUrl = process.env.METEORA_API_URL || 'https://dlmm-api.meteora.ag/pair/all_by_groups';
+      
+      // Build query parameters for server-side filtering
+      const params = new URLSearchParams();
+      // Include both possible token pair combinations
+      const tokenPair1 = `${tokenAMint}-${tokenBMint}`;
+      const tokenPair2 = `${tokenBMint}-${tokenAMint}`;
+      params.append('include_pool_token_pairs', `${tokenPair1},${tokenPair2}`);
+      
+      const url = `${baseUrl}?${params.toString()}`;
+      
+      console.log(`[Meteora] Querying: ${url}`);
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -35,28 +49,21 @@ export class MeteoraMarket extends MarketProvider<MeteoraMarketResult> {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const allPools = await response.json();
+      const apiResponse = await response.json();
       
-      if (!Array.isArray(allPools)) {
-        throw new Error('Invalid API response format from Meteora');
+      // The all_by_groups endpoint returns data in the format: { groups: [{ name: string, pairs: [...] }], total: number }
+      // We need to extract pools from all groups
+      let relevantPools: any[] = [];
+      
+      if (apiResponse && apiResponse.groups && Array.isArray(apiResponse.groups)) {
+        for (const group of apiResponse.groups) {
+          if (group.pairs && Array.isArray(group.pairs)) {
+            relevantPools.push(...group.pairs);
+          }
+        }
       }
       
-      console.log(`[Meteora] Received ${allPools.length} pools from API`);
-      
-      // Filter pools for our token pair
-      const relevantPools = allPools.filter((pool: any) => {
-        const mintX = pool.mint_x?.toLowerCase();
-        const mintY = pool.mint_y?.toLowerCase();
-        const tokenA = tokenAMint.toLowerCase();
-        const tokenB = tokenBMint.toLowerCase();
-        
-        return (
-          (mintX === tokenA && mintY === tokenB) ||
-          (mintX === tokenB && mintY === tokenA)
-        );
-      });
-      
-      console.log(`[Meteora] Found ${relevantPools.length} pools for token pair`);
+      console.log(`[Meteora] Received ${relevantPools.length} pools from server-side filtered API`);
       
       if (relevantPools.length === 0) {
         return [];
@@ -72,7 +79,7 @@ export class MeteoraMarket extends MarketProvider<MeteoraMarketResult> {
             current_price: pool.current_price,
             liquidity: pool.liquidity,
             bin_step: pool.bin_step,
-            base_fee: pool.base_fee,
+            base_fee_percentage: pool.base_fee_percentage,
             mint_x: pool.mint_x,
             mint_y: pool.mint_y
           });
@@ -80,7 +87,7 @@ export class MeteoraMarket extends MarketProvider<MeteoraMarketResult> {
           const liquidity = parseFloat(pool.liquidity || '0');
           const currentPrice = parseFloat(pool.current_price || '0');
           const binStep = parseInt(pool.bin_step || '0');
-          const baseFee = pool.base_fee !== undefined ? parseFloat(pool.base_fee) : null;
+          const baseFeePercentage = pool.base_fee_percentage !== undefined ? parseFloat(pool.base_fee_percentage) : null;
           
           // Skip pools with insufficient liquidity
           if (liquidity < this.minLiquidity) {
@@ -111,7 +118,7 @@ export class MeteoraMarket extends MarketProvider<MeteoraMarketResult> {
             dex: 'Meteora',
             binStep: binStep,
             liquidity: liquidity,
-            baseFeePercentage: baseFee !== null ? baseFee * 100 : null // Convert to percentage only if baseFee exists
+            baseFeePercentage: baseFeePercentage // API already provides percentage value
           });
           
         } catch (poolError) {
