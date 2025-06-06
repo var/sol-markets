@@ -21,6 +21,8 @@ The GraphQL resolvers and type definitions are organized into domain-specific mo
 - **`src/dex/raydium/raydium.graphql`** - Raydium-specific schemas  
 - **`src/dex/meteora/meteora.graphql`** - Meteora-specific schemas
 - **`src/dex/pumpfun/pumpfun.graphql`** - PumpFun subscriptions and queries
+- **`src/dex/raydium-launchlab/raydium-launchlab.graphql`** - Raydium Launchlab token monitoring
+- **`src/dex/trenches/trenches.graphql`** - Unified token creation subscriptions with Union types
 
 ### TypeScript Definitions
 - **`src/types/graphql.d.ts`** - TypeScript declarations for `.graphql` file imports
@@ -29,7 +31,9 @@ The GraphQL resolvers and type definitions are organized into domain-specific mo
 ## Resolver Organization
 
 ### Domain-Specific Resolvers
-- **`src/dex/pumpfun/pumpfun.resolver.ts`** - Real-time token monitoring with subscription lifecycle management
+- **`src/dex/pumpfun/pumpfun.resolver.ts`** - Real-time PumpFun token monitoring with subscription lifecycle management
+- **`src/dex/raydium-launchlab/raydium-launchlab.resolver.ts`** - Real-time Raydium Launchlab token monitoring
+- **`src/dex/trenches/trenches.resolver.ts`** - Unified token creation subscriptions with Union type resolution
 - **`src/dex/orca/orca.resolver.ts`** - Orca market queries with proper type safety
 - **`src/dex/raydium/raydium.resolver.ts`** - Raydium market queries optimized
 - **`src/dex/meteora/meteora.resolver.ts`** - Meteora market queries with slippage handling
@@ -39,17 +43,21 @@ The GraphQL resolvers and type definitions are organized into domain-specific mo
 
 ### Production-Ready Features
 - **Pure GraphQL Schemas**: Uses `.graphql` files for proper IDE support and syntax validation
+- **Union Type Architecture**: Flexible schema supporting multiple token types with `__resolveType`
 - **Optimized Resolvers**: Removed redundant code and improved type safety
 - **Efficient Constructor Patterns**: Removed unused parameters (e.g., unnecessary `rpcEndpoint`)
-- **Smart Resource Management**: Automatic PumpFun monitoring lifecycle with subscription counting
-- **Error Resilience**: Graceful failure handling with parallel DEX queries
+- **Smart Resource Management**: Automatic monitoring lifecycle for all platforms with subscription counting
+- **Error Resilience**: Graceful failure handling with parallel DEX queries and monitoring services
 - **Type Safety**: Strict TypeScript interfaces for all resolver parameters
+- **Consistent Patterns**: Unified logging and error handling across all services
 
 ### Performance Improvements
 - **Parallel Execution**: All DEX market queries run simultaneously
 - **Memory Efficiency**: Cached GraphQL document parsing with `graphql-tag`
 - **Minimal Bundle Size**: Removed unused imports and redundant code
-- **Lazy Loading**: PumpFun monitoring only starts when subscriptions are active
+- **Lazy Loading**: Token monitoring only starts when subscriptions are active
+- **Zero Code Duplication**: Union types reuse existing interfaces completely
+- **Efficient Subscriptions**: Single subscription handles multiple platforms
 
 ## Benefits
 
@@ -68,29 +76,42 @@ The GraphQL resolvers and type definitions are organized into domain-specific mo
 
 ## Usage Examples
 
-### Pure GraphQL Schema Development
+### Union Type Schema Development
 ```graphql
-# Example: Adding a new field to Orca schema
-extend type Query {
-  orcaPoolDetails(poolAddress: String!): OrcaPoolDetails
+# Example: Token creation union type
+union TrenchesTokenUnion = PumpFunToken | RaydiumLaunchlabToken
+
+type TrenchesTokenEvent {
+  type: String!
+  dex: String!
+  token: TrenchesTokenUnion!
+  timestamp: String!
+  txSignature: String!
 }
 
-type OrcaPoolDetails {
-  address: String!
-  liquidity: Float!
-  volume24h: Float!
-  fees: PoolFees!
+type Subscription {
+  trenchesNewTokens: TrenchesTokenEvent!
 }
 ```
 
-### Resolver Implementation
+### Union Type Resolver Implementation
 ```typescript
-// Corresponding resolver with optimized patterns
-export const orcaResolvers = {
-  Query: {
-    async orcaPoolDetails(_: unknown, { poolAddress }: { poolAddress: string }) {
-      const orcaService = new OrcaMarket(0);
-      return orcaService.getPoolDetails(poolAddress);
+// Union type resolver with __resolveType
+export const trenchesResolvers = {
+  TrenchesTokenUnion: {
+    __resolveType(obj: any) {
+      if (obj.__tokenType === 'PUMPFUN') {
+        return 'PumpFunToken';
+      }
+      if (obj.__tokenType === 'RAYDIUM_LAUNCHLAB') {
+        return 'RaydiumLaunchlabToken';
+      }
+      return null;
+    },
+  },
+  Subscription: {
+    trenchesNewTokens: {
+      subscribe: () => pubsub.asyncIterator(['TRENCHES_NEW_TOKEN']),
     },
   },
 };
@@ -117,9 +138,15 @@ src/
 │   ├── meteora/
 │   │   ├── meteora.graphql   # Meteora schema
 │   │   └── meteora.resolver.ts
-│   └── pumpfun/
-│       ├── pumpfun.graphql   # PumpFun schema
-│       └── pumpfun.resolver.ts
+│   ├── pumpfun/
+│   │   ├── pumpfun.graphql   # PumpFun schema
+│   │   └── pumpfun.resolver.ts
+│   ├── raydium-launchlab/
+│   │   ├── raydium-launchlab.graphql  # Raydium Launchlab schema
+│   │   └── raydium-launchlab.resolver.ts
+│   └── trenches/
+│       ├── trenches.graphql  # Unified token subscriptions
+│       └── trenches.resolver.ts
 ├── markets/
 │   ├── market.graphql        # Market operations
 │   └── market.resolver.ts    # Market aggregation
@@ -129,4 +156,4 @@ src/
     └── graphql-loader.ts     # Schema loader utility
 ```
 
-This architecture provides a scalable, maintainable, and production-ready GraphQL implementation that follows industry best practices while maintaining excellent developer experience. 
+This architecture provides a scalable, maintainable, and production-ready GraphQL implementation that follows industry best practices while maintaining excellent developer experience. The Union type system enables flexible token type support while maintaining zero code duplication and consistent interfaces across all platforms. 

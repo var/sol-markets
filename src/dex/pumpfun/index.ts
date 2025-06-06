@@ -2,16 +2,17 @@ import { EventEmitter } from 'events';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Idl, BorshCoder } from '@project-serum/anchor';
 import { PumpFunToken } from './types';
+
 import pumpIdl from './pump-fun-idl.json';
 
 // PumpFun program ID 
 const PUMPFUN_PROGRAM_ID = new PublicKey('6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P');
 
 export class PumpFunService extends EventEmitter {
-  private connection: Connection;
-  private coder: BorshCoder;
-  private isMonitoring: boolean = false;
-  private subscriptionId: number | null = null;
+  private readonly connection: Connection;
+  private readonly coder: BorshCoder;
+  private isMonitoring = false;
+  private subscriptionId: number | undefined = undefined;
 
   constructor(connection: Connection) {
     super();
@@ -75,13 +76,13 @@ export class PumpFunService extends EventEmitter {
     console.log('[PumpFun] Stopping monitoring...');
     this.isMonitoring = false;
 
-    if (this.subscriptionId !== null) {
+    if (this.subscriptionId !== undefined) {
       try {
         await this.connection.removeOnLogsListener(this.subscriptionId);
       } catch (error) {
         console.error('[PumpFun] Error removing subscription:', error);
       }
-      this.subscriptionId = null;
+      this.subscriptionId = undefined;
     }
   }
 
@@ -106,9 +107,9 @@ export class PumpFunService extends EventEmitter {
         name: eventData.name || 'Unknown Token',
         symbol: eventData.symbol || 'UNKNOWN',
         description: eventData.description || `New token created on PumpFun`,
-        image: eventData.uri || null,
+        image: eventData.uri || undefined,
         creator: eventData.user ? eventData.user.toString() : 'Unknown',
-        bondingCurveKey: eventData.bondingCurve ? eventData.bondingCurve.toString() : null,
+        bondingCurveKey: eventData.bondingCurve ? eventData.bondingCurve.toString() : undefined,
         createdTimestamp: Math.floor(Date.now() / 1000)
       };
 

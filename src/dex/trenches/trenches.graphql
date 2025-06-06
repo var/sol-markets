@@ -1,0 +1,23 @@
+extend type Subscription {
+  trenchesNewTokens: TrenchesTokenEvent!
+}
+
+# Union of existing token types - ready for future differences!
+union TrenchesTokenUnion = PumpFunToken | RaydiumLaunchlabToken
+
+type TrenchesTokenEvent {
+  type: TrenchesEventType!
+  token: TrenchesTokenUnion!
+  dex: TrenchesDex!  # DEX field at event level to differentiate
+  timestamp: Float!
+  txSignature: String
+}
+
+enum TrenchesDex {
+  PUMPFUN
+  RAYDIUM_LAUNCHLAB
+}
+
+enum TrenchesEventType {
+  token_created
+} 

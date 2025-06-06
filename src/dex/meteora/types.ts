@@ -4,5 +4,5 @@ export interface MeteoraMarketResult extends PriceMarket {
   dex: 'Meteora';
   binStep: number;
   liquidity: number;
-  baseFeePercentage: number | null;
+  baseFeePercentage: number | undefined;
 } 

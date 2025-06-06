@@ -2,7 +2,7 @@ import { Connection } from '@solana/web3.js';
 import { PumpFunService } from './index';
 
 // Global PumpFun service instance
-let pumpFunServiceInstance: PumpFunService | null = null;
+let pumpFunServiceInstance: PumpFunService | undefined = undefined;
 
 /**
  * Get or create the global PumpFun service instance
@@ -42,6 +42,6 @@ export async function stopPumpFunMonitoring(): Promise<void> {
 export async function destroyPumpFunService(): Promise<void> {
   if (pumpFunServiceInstance) {
     await pumpFunServiceInstance.destroy();
-    pumpFunServiceInstance = null;
+    pumpFunServiceInstance = undefined;
   }
 } 

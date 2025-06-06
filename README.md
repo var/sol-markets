@@ -7,8 +7,12 @@ A TypeScript application that fetches token pair prices from multiple Solana DEX
 - **Multi-DEX Support**: Fetches prices from Orca, Raydium, and Meteora
 - **GraphQL API**: Modern GraphQL interface for querying token prices
 - **Real-time Data**: Live price feeds from DEX APIs
-- **PumpFun Monitoring**: Real-time on-chain monitoring of new PumpFun token creation events
-- **GraphQL Subscriptions**: Live WebSocket-based subscriptions for PumpFun token events
+- **Token Creation Monitoring**: Real-time on-chain monitoring of new token creation events
+  - **PumpFun**: Full support for PumpFun token creation events
+  - **Raydium Launchlab**: Complete monitoring of Raydium Launchlab token launches
+  - **Unified Subscription**: Single subscription for all platforms via `trenchesNewTokens`
+- **GraphQL Subscriptions**: Live WebSocket-based subscriptions for token events
+- **Union Types**: Flexible GraphQL schema supporting multiple token types
 - **Comprehensive Data**: Includes liquidity, volume, fees, and pool information
 - **TypeScript**: Fully typed for better development experience
 
@@ -277,15 +281,34 @@ query GetMeteoraMarkets {
 - `orcaMarkets(tokenAMint, tokenBMint, slippageBps?, minLiquidity?)` - Get markets from Orca DEX only (minLiquidity filters by TVL in USD)
 - `raydiumMarkets(tokenAMint, tokenBMint, slippageBps?, minLiquidity?)` - Get markets from Raydium DEX only (minLiquidity filters by liquidity value)  
 - `meteoraMarkets(tokenAMint, tokenBMint, slippageBps?, minLiquidity?)` - Get markets from Meteora DEX only (slippage affects calculations, minLiquidity filters by liquidity value)
-
-**Available DEX Values:**
-- `ORCA` - Orca DEX
-- `RAYDIUM` - Raydium DEX  
-- `METEORA` - Meteora DEX
+- `pumpFunMonitoringStatus()` - Check if PumpFun on-chain monitoring is active
+- `raydiumLaunchlabMonitoringStatus()` - Check if Raydium Launchlab on-chain monitoring is active
 
 #### GraphQL Subscriptions (Real-time Events)
 
-**Subscribe to new PumpFun token creation events:**
+**Subscribe to new token creation events from all platforms (Recommended):**
+```graphql
+subscription TrenchesNewTokens {
+  trenchesNewTokens {
+    type
+    dex  # PUMPFUN or RAYDIUM_LAUNCHLAB
+    token {
+      mint
+      name
+      symbol
+      description
+      image
+      creator
+      bondingCurveKey
+      createdTimestamp
+    }
+    timestamp
+    txSignature
+  }
+}
+```
+
+**Subscribe to PumpFun tokens only:**
 ```graphql
 subscription NewPumpFunTokens {
   newPumpFunToken {
@@ -295,7 +318,30 @@ subscription NewPumpFunTokens {
       name
       symbol
       description
+      image
       creator
+      bondingCurveKey
+      createdTimestamp
+    }
+    timestamp
+    txSignature
+  }
+}
+```
+
+**Subscribe to Raydium Launchlab tokens only:**
+```graphql
+subscription NewRaydiumLaunchlabTokens {
+  newRaydiumLaunchlabToken {
+    type
+    token {
+      mint
+      name
+      symbol
+      description
+      image
+      creator
+      bondingCurveKey
       createdTimestamp
     }
     timestamp
@@ -314,31 +360,50 @@ subscription NewPumpFunTokens {
 - `raydiumMarkets(tokenAMint, tokenBMint, slippageBps?, minLiquidity?)` - Get markets from Raydium DEX only (minLiquidity filters by liquidity value)  
 - `meteoraMarkets(tokenAMint, tokenBMint, slippageBps?, minLiquidity?)` - Get markets from Meteora DEX only (slippage affects calculations, minLiquidity filters by liquidity value)
 - `pumpFunMonitoringStatus()` - Check if PumpFun on-chain monitoring is active
+- `raydiumLaunchlabMonitoringStatus()` - Check if Raydium Launchlab on-chain monitoring is active
 
 **Available Subscriptions:**
+- `trenchesNewTokens` - **Unified subscription** for all token creation events (PumpFun + Raydium Launchlab)
 - `newPumpFunToken` - Real-time events for new PumpFun token creation (on-chain monitoring)
+- `newRaydiumLaunchlabToken` - Real-time events for new Raydium Launchlab token creation (on-chain monitoring)
 
 **Available DEX Values:**
 - `ORCA` - Orca DEX
 - `RAYDIUM` - Raydium DEX  
 - `METEORA` - Meteora DEX
 
-## PumpFun On-Chain Monitoring
+## Token Creation Monitoring
 
-The application includes real-time monitoring of PumpFun token creation events directly from the Solana blockchain:
+The application includes real-time monitoring of token creation events from multiple Solana launchpads directly from the blockchain:
+
+### Supported Platforms
+- **PumpFun**: Original meme coin launchpad with bonding curve mechanism
+- **Raydium Launchlab**: Professional token launchpad with advanced features
+- **Unified Subscription**: Single GraphQL subscription covering all platforms
 
 ### Features
-- **On-Chain Event Listening**: Monitors Solana program logs for PumpFun token creation transactions
+- **On-Chain Event Listening**: Monitors Solana program logs for token creation transactions
 - **Real-Time Subscriptions**: WebSocket-based GraphQL subscriptions for live event streaming
 - **Transaction Parsing**: Extracts token metadata from on-chain transaction data
+- **Union Types**: Flexible GraphQL schema supporting different token types
 - **Duplicate Prevention**: Filters out duplicate transactions and events
 - **Error Handling**: Robust error handling for network issues and invalid transactions
 
 ### Technical Details
-- **Program ID**: `6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P` (PumpFun program)
-- **Connection**: Uses Solana WebSocket connection to listen for program logs
+
+**PumpFun Monitoring:**
+- **Program ID**: `6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P`
 - **Event Types**: `token_created`, `token_updated`, `token_completed`
-- **Data Source**: Directly from Solana blockchain transactions (no API dependencies)
+
+**Raydium Launchlab Monitoring:**
+- **Program ID**: `39azUYFWPz3VHgKCf3VChUwbpURdCHRxjWVowf5jUJjg`
+- **Events**: Token creation and launch transactions
+- **Metadata**: Comprehensive token information including images and descriptions
+
+**Common Features:**
+- **Connection**: Solana WebSocket connection for real-time monitoring
+- **Data Source**: Directly from blockchain transactions (no API dependencies)
+- **Logging**: Consistent monitoring logs across all platforms
 
 ## Testing
 
@@ -374,10 +439,14 @@ The application follows a modular architecture with domain-driven design:
 
 - **GraphQL Server**: Apollo Server with WebSocket subscriptions
 - **DEX Providers**: Modular providers for each DEX (Orca, Raydium, Meteora)
-- **PumpFun Service**: On-chain event monitoring with Anchor-based decoding
+- **Token Creation Monitoring**: 
+  - **PumpFun Service**: On-chain event monitoring with Anchor-based decoding
+  - **Raydium Launchlab Service**: Complete token launch monitoring
+  - **Trenches Resolver**: Unified subscription combining all platforms
+- **Union Types**: Flexible GraphQL schema supporting multiple token types
 - **Type Safety**: Full TypeScript coverage with strict typing
-- **Testing**: Comprehensive test suite with Jest and mocking
-- **Production Ready**: Docker containerization and health checks
+- **Testing**: Comprehensive test suite with Jest and mocking (61 tests)
+- **Production Ready**: Docker containerization, health checks, and consistent logging
 
 ## License
 

@@ -100,7 +100,7 @@ export class MeteoraMarket extends MarketProvider<MeteoraMarketResult> {
     const liquidity = parseFloat(pool.liquidity || '0');
     const currentPrice = parseFloat(pool.current_price || '0');
     const binStep = parseInt(pool.bin_step || '0');
-    const baseFeePercentage = pool.base_fee_percentage !== undefined ? parseFloat(pool.base_fee_percentage) : null;
+    const baseFeePercentage = pool.base_fee_percentage !== undefined ? parseFloat(pool.base_fee_percentage) : undefined;
     
     // Skip pools with insufficient liquidity
     if (liquidity < this.minLiquidity) {

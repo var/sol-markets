@@ -1,0 +1,34 @@
+extend type Query {
+  raydiumLaunchlabMonitoringStatus: RaydiumLaunchlabMonitoringStatus!
+}
+
+extend type Subscription {
+  newRaydiumLaunchlabToken: RaydiumLaunchlabTokenEvent!
+}
+
+type RaydiumLaunchlabToken {
+  mint: String!
+  name: String!
+  symbol: String!
+  description: String
+  image: String
+  creator: String!
+  bondingCurveKey: String
+  createdTimestamp: Float!
+}
+
+type RaydiumLaunchlabTokenEvent {
+  type: RaydiumLaunchlabEventType!
+  token: RaydiumLaunchlabToken!
+  timestamp: Float!
+  txSignature: String
+}
+
+type RaydiumLaunchlabMonitoringStatus {
+  isActive: Boolean!
+  message: String!
+}
+
+enum RaydiumLaunchlabEventType {
+  token_created
+} 

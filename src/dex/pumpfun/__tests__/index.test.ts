@@ -133,7 +133,7 @@ describe('PumpFunService', () => {
       const mockLogs = {
         signature: 'test-signature-123',
         logs: ['Program data: SGVsbG8gV29ybGQ='],
-        err: null
+        err: undefined
       };
 
       await pumpFunService.startMonitoring();
@@ -167,7 +167,7 @@ describe('PumpFunService', () => {
       const mockLogs = {
         signature: 'trade-signature',
         logs: ['Program data: dHJhZGVkYXRh'],
-        err: null
+        err: undefined
       };
 
       await pumpFunService.startMonitoring();
@@ -191,7 +191,7 @@ describe('PumpFunService', () => {
       const mockLogs = {
         signature: 'invalid-signature',
         logs: ['Program data: aW52YWxpZA=='],
-        err: null
+        err: undefined
       };
 
       await pumpFunService.startMonitoring();
@@ -213,7 +213,7 @@ describe('PumpFunService', () => {
           'Program log: some other log',
           'Program 6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P success'
         ],
-        err: null
+        err: undefined
       };
 
       await pumpFunService.startMonitoring();
@@ -241,7 +241,7 @@ describe('PumpFunService', () => {
       const mockLogs = {
         signature: 'minimal-signature',
         logs: ['Program data: bWluaW1hbA=='],
-        err: null
+        err: undefined
       };
 
       await pumpFunService.startMonitoring();
@@ -259,8 +259,8 @@ describe('PumpFunService', () => {
       expect(event.token.name).toBe('Unknown Token');
       expect(event.token.symbol).toBe('UNKNOWN');
       expect(event.token.creator).toBe('Unknown');
-      expect(event.token.image).toBeNull();
-      expect(event.token.bondingCurveKey).toBeNull();
+      expect(event.token.image).toBeUndefined();
+      expect(event.token.bondingCurveKey).toBeUndefined();
     });
 
     it('should log token creation with proper formatting', async () => {
@@ -280,7 +280,7 @@ describe('PumpFunService', () => {
       const mockLogs = {
         signature: 'logged-signature',
         logs: ['Program data: bG9nZ2Vk'],
-        err: null
+        err: undefined
       };
 
       await pumpFunService.startMonitoring();
